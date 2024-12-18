@@ -1,3 +1,5 @@
 ECHO is on.
 myvenv #ignore virtual env file"myvenv" 
 "myvenv/" 
+myvenv/
+
