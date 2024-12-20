@@ -13,7 +13,7 @@ from openpyxl import Workbook
 import pathlib
 from pathlib import *
 import datetime
-# from tkcalendar import *
+from tkcalendar import *
 from tkinter.filedialog import asksaveasfile, asksaveasfilename, askopenfilename
 
 
@@ -21,7 +21,7 @@ from tkinter.filedialog import asksaveasfile, asksaveasfilename, askopenfilename
 
 ########## window ##########
 root = Tk()
-root.geometry("1366x720")
+root.geometry("1280x720")
 root.resizable(0,0)
 root.state("zoomed")
 root.title("Login")
@@ -197,15 +197,17 @@ def verify_password(username, password):
 
 
 def message_box(msg):
-    message_frame=Frame(login_frame,relief=SOLID,
-                        highlightthickness=2,highlightbackground="gray")
-    close_button=Button(message_frame,text="X",font="bold 12",
-                        bd=0,command=lambda: message_frame.destroy())
-    close_button.pack(side=TOP,anchor=E)
-    message_lb=Label(message_frame,text=msg,font="bold 15")
-    message_lb.pack(pady=20)
+    # Check if login_frame exists
+    if root.winfo_exists():
+        message_frame = Frame(root, relief=SOLID, highlightthickness=2, highlightbackground="gray")
+        close_button = Button(message_frame, text="X", font="bold 12", bd=0, command=lambda: message_frame.destroy())
+        close_button.pack(side=TOP, anchor=E)
+        message_lb = Label(message_frame, text=msg, font="bold 15")
+        message_lb.pack(pady=20)
 
-    message_frame.place(x=90,y=270,width=230,height=180)
+        message_frame.place(x=90, y=270, width=230, height=180)
+    else:
+        print("Error: login_frame does not exist.")
 
 
 
@@ -242,19 +244,19 @@ def login_page():
 
 ############## theme function #########################
     def switch_theme(theme):
-        if theme == "black":
+        if theme == "Dark":
             root.tk_setPalette("black")
 
-            theme_lb.config(text="Black")
+            theme_lb.config(text="Dark")
             theme_btn.config(image=dark_theme)
-            theme_btn.config(command= lambda: switch_theme("white"))
+            theme_btn.config(command= lambda: switch_theme("Light"))
 
         else:
             root.tk_setPalette("white")
 
-            theme_lb.config(text="White")
+            theme_lb.config(text="Light")
             theme_btn.config(image=white_theme)
-            theme_btn.config(command= lambda: switch_theme("black"))
+            theme_btn.config(command= lambda: switch_theme("Dark"))
 
 
     def verify():
@@ -263,21 +265,21 @@ def login_page():
                 if check_username_already_exists(username.get()):
                     if verify_password(username=username.get(),
                                          password=password.get()):
-                        message_box(msg="Successful login")
+                        messagebox.showinfo("Account", "Successful login")
                         name = username.get()
                         login_frame.destroy()
                         dashboard(username=name)
                                             
                     else:
-                         message_box(msg="!Wrong Password")
+                         messagebox.showerror("Password", "!Wrong Password")
 
                 else:
-                    message_box(msg="!Wrong username")
+                    messagebox.showerror("Username", "!Wrong username")
 
             else:
-                message_box(msg="Password is Required")
+                messagebox.showerror("Password", "Password is Required")
         else:
-            message_box(msg="Username is Required")
+            messagebox.showerror("Username", "Username is Required")
         # if username == username.get() and password == password.get():
         #     login_frame.destroy()
         #     student_database()
@@ -372,7 +374,7 @@ def login_page():
                         fg="white",
                         image=white_theme,
                         bd=0,
-                        command=lambda: switch_theme("black"))
+                        command=lambda: switch_theme("Dark"))
     theme_btn.place(relx=0.8,rely=0.9,anchor=CENTER)
 
 
@@ -407,26 +409,27 @@ def register_page():
 ######## verify function #######################
     def verify():
         if username.get() != "":
-            if password.get != "":
-                if confirm_password.get() == password.get():
-                    if not check_username_already_exists(username.get()):
-
-                        response = register_account(username=username.get(),
-                                         password=password.get()) 
-                        if response:
-                            username.delete(0, END)
-                            password.delete(0, END)
-                            confirm_password.delete(0, END)
-                            message_box("Account\nhas been created")
-                    else:
-                        message_box("Username\nAlready exists")
-                else:   
-                    message_box(msg="Password incorrect")
-                    
+            if password.get() != "":
+                if confirm_password.get() == "":
+                    messagebox.showerror("Password", "Confirm Password")
+                    # message_box(msg="Please confirm \nyour password")
+                elif confirm_password.get() != password.get():
+                    messagebox.showerror("Password", "Confirm Incorrect")
+                    # message_box(msg="Password incorrect")
+                elif not check_username_already_exists(username.get()):
+                    response = register_account(username=username.get(),
+                                                password=password.get()) 
+                    if response:
+                        username.delete(0, END)
+                        password.delete(0, END)
+                        confirm_password.delete(0, END)
+                        messagebox.showinfo("Account", "Account created successfully")
+                else:
+                    messagebox.showerror("username", "Username Already exists")
             else:
-                message_box(msg="Password is Required")        
+                messagebox.showerror("Password", "Password is Required")        
         else:
-            message_box(msg="Username is Required")
+            messagebox.showerror("Username","Username is Required")
 
 
 
@@ -446,7 +449,7 @@ def register_page():
 ############  entry ############
 
     username = CTkEntry(register_frame, 
-                          placeholder_text="enter password",
+                          placeholder_text="Username",
                           text_color="black",
                           width=300,
                           bg_color="black",
@@ -454,7 +457,7 @@ def register_page():
                           font=("arial", 15))
     username.place(relx=0.5,rely=0.3,anchor=CENTER)
     password = CTkEntry(register_frame, 
-                          placeholder_text="enter password",
+                          placeholder_text="Password",
                           text_color="black",
                           width=300,
                           bg_color="black",
@@ -463,7 +466,7 @@ def register_page():
     password.place(relx=0.5,rely=0.5,anchor=CENTER)
 
     confirm_password = CTkEntry(register_frame, 
-                        placeholder_text="enter confirm password",
+                        placeholder_text="Confirm Password",
                         text_color="black",width=300,
                         bg_color="black",
                         fg_color="white",
@@ -773,37 +776,58 @@ def dashboard(username):
         clear()
         save_btn.configure(state='disable')
 
-        file=openpyxl.load_workbook('student_data.xlsx')
-        sheet=file.active
+        file = openpyxl.load_workbook('student_data.xlsx')
+        sheet = file.active
+
+        found = False  # Flag to check if a match is found
+
         for row in sheet.rows:
-            if row[0].value == int(text):
-                name=row[0]
-                registration_no_position=str(name)[14:-1]
-                registration_number=str(name)[15:-1]
-            
+            reg_number = row[0].value
+            student_name = row[1].value  # Assuming the name is in the second column
+
+            # Check if the search text matches the registration number
+            if reg_number and str(reg_number) == text:
+                found = True
+                name = row[0]
+                registration_no_position = str(name)[14:-1]
+                registration_number = str(name)[15:-1]
+                break
+
+            # Check if the search text matches the student's name
+            if student_name and text.lower() in student_name.lower():
+                found = True
+                name = row[0]
+                registration_no_position = str(name)[14:-1]
+                registration_number = str(name)[15:-1]
+                break
+
+        if not found:
+            messagebox.showerror("Invalid", "Invalid registration number or name!")
+            return
 
         try:
-            registration_no_position=str(name)[14:-1]
+            registration_no_position = str(name)[14:-1]
         except:
             messagebox.showerror("Invalid", "Invalid registration number!")
-        x1=sheet.cell(row=int(registration_number),column=1).value
-        x2=sheet.cell(row=int(registration_number),column=2).value
-        x3=sheet.cell(row=int(registration_number),column=3).value
-        x4=sheet.cell(row=int(registration_number),column=4).value
-        x5=sheet.cell(row=int(registration_number),column=5).value
-        x6=sheet.cell(row=int(registration_number),column=6).value
-        x7=sheet.cell(row=int(registration_number),column=7).value
-        x8=sheet.cell(row=int(registration_number),column=8).value
-        x9=sheet.cell(row=int(registration_number),column=9).value
-        x10=sheet.cell(row=int(registration_number),column=10).value
-        x11=sheet.cell(row=int(registration_number),column=11).value
-        x12=sheet.cell(row=int(registration_number),column=12).value
-        
+
+        x1 = sheet.cell(row=int(registration_number), column=1).value
+        x2 = sheet.cell(row=int(registration_number), column=2).value
+        x3 = sheet.cell(row=int(registration_number), column=3).value
+        x4 = sheet.cell(row=int(registration_number), column=4).value
+        x5 = sheet.cell(row=int(registration_number), column=5).value
+        x6 = sheet.cell(row=int(registration_number), column=6).value
+        x7 = sheet.cell(row=int(registration_number), column=7).value
+        x8 = sheet.cell(row=int(registration_number), column=8).value
+        x9 = sheet.cell(row=int(registration_number), column=9).value
+        x10 = sheet.cell(row=int(registration_number), column=10).value
+        x11 = sheet.cell(row=int(registration_number), column=11).value
+        x12 = sheet.cell(row=int(registration_number), column=12).value
+
         Registration.set(x1)
         Name.set(x2)
         Class.set(x3)
 
-        if x4=='Female':
+        if x4 == 'Female':
             R2.select()
         else:
             R1.select()
@@ -869,9 +893,27 @@ def dashboard(username):
         messagebox.showinfo("Update", "Update Successfully")
         clear()
 
-    # def delete():
-    #     pass
-        
+    def delete():
+        text = search_entry.get()  # Assuming this is used to identify the student
+        file = openpyxl.load_workbook('student_data.xlsx')
+        sheet = file.active
+
+        found = False  # Flag to check if a match is found
+
+        for row in sheet.iter_rows(min_row=2):  # Assuming the first row is headers
+            reg_number = row[0].value
+
+            # Check if the search text matches the registration number
+            if reg_number and str(reg_number) == text:
+                found = True
+                sheet.delete_rows(row[0].row, 1)  # Delete the entire row
+                file.save('student_data.xlsx')  # Save changes to the file
+                clear()  # Clear all input fields
+                messagebox.showinfo("Deleted", "Student record deleted successfully.")
+                break
+
+        if not found:
+            messagebox.showerror("Not Found", "Student record not found.")
 
 
 #############top label######################
@@ -1040,12 +1082,11 @@ def dashboard(username):
     update_btn=Button(dashboard_frame,text="Update",width=19,height=2,font="arial 12 bold",bg="lightpink",command=update)
     update_btn.place(x=1000,y=450)
 
-    # delete_btn=Button(dashboard_frame,text="Delete",width=19,height=2,font="arial 12 bold",bg="red",command=delete)
-    # delete_btn.place(x=1000,y=530)
+    delete_btn=Button(dashboard_frame,text="Delete",width=19,height=2,font="arial 12 bold",bg="red",command=delete)
+    delete_btn.place(x=1000,y=530)
 
    
 ####### run ###########
 create_database()
 login_page()
-#dashboard(username="")
 root.mainloop()
