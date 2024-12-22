@@ -561,11 +561,11 @@ def dashboard(username):
     
     def verify():
         sure = askyesno(title='Delete Account',
-                        message='Are you Sure you Want to Delete Account')
+                        message='Are you Sure you want to delete the account')
         if sure:
             delete_account(username)
             logout()
-            message_box(msg='Account\n has been Deleted')
+            messagebox.showinfo("Account", 'Account deleted successfully')
 
 
     def delete_account(username):
